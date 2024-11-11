@@ -1,0 +1,6 @@
+.back{
+    background: url("../../img/authpages.jpg");
+    background-size: cover; /* Make image cover entire element */
+    background-position: center; /* Center the image */
+    background-repeat: repeat; /* Prevent repeating */
+}
