@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <title>AlertMe 9Ja</title>
+    <link rel="stylesheet" href="/public/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/public/css/main.min.css" />
+    <link rel="stylesheet" href="/public/css/responsive.css" />
+    <link rel="stylesheet" href="/public/css/color.css" />
+    <link rel="stylesheet" href="/public/css/style.css" />
+
+  </head>
+
+  <body>
+      <div class="theme-layout">
+          <div class="topbar stick" style="display: grid; grid-template-columns: 1fr 3fr;">
+              <div class="logo" style="justify-self: left;">
+                  <a href="/">
+                    <img src="/public/img/logo.png" alt="logo" style="width: 80px; height: 70px;" />
+                  </a>
+              </div>
+
+              <div class="top-area" style="display: flex; justify-content: right; justify-self: flex-end; align-items: center;">
+                  <ul class="main-menu" id="main-menu">
+
+                  </ul>
+
+                  <ul class="setting-area">
+
+                  </ul>
+                  
+              </div>
+          </div>
+        
+      
+    <script>
+      var mainURL = "http://localhost:3000";
+
+      
+function showAddPost() {
+  var html = "";
+
+  if (localStorage.getItem("accessToken")) {
+    html += `
+      <div class="central-meta">
+        <div class="new-postbox">
+          <figure>
+            <img src="<%= profileImage %>" alt="User Profile Image">
+          </figure>
+          <div class="newpst-input">
+            <form method="post" id="form-add-post" onsubmit="return doPost(this);">
+              <input name="type" type="hidden" value="post">
+              <textarea rows="3" name="caption" placeholder="Write something..."></textarea>
+              <div class="attachments">
+                <ul>
+                  <li>
+                    <img id="post-img-preview" style="display: none;" alt="Image Preview">  
+                  </li>
+                  <li>
+                    <video id="post-video-preview" controls style="display: none;">  
+                      Your browser does not support the video tag.
+                    </video>
+                  </li>
+                  <li>
+                    <i class="fa fa-image"></i>
+                    <label class="fileContainer">
+                      <input type="file" name="image" accept="image/*" onchange="previewPostImage(this);">
+                    </label>
+                  </li>
+                  <li>
+                    <i class="fa fa-video-camera"></i>
+                    <label class="fileContainer">
+                      <input type="file" name="video" accept="video/*" onchange="previewPostVideo(this);">
+                    </label>
+                  </li>
+                </ul>
+              </div>
+              <button type="submit" class="mtr-btn"><span>Post</span></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("add-post-box").innerHTML = html;
+  }
+}
+
+
+
+/*
+function showAddPost() {
+  var html = "";
+  if (localStorage.getItem("accessToken")) {
+    
+    html += '<div class="central-meta">';
+      html += '<div class="new-postbox">';
+        html += '<figure>';
+          html += '<img src="' + mainURL + '/' + window.user.profileImage + '" alt="User Profile Image">';
+        html += '</figure>';
+
+        html += '<div class="newpst-input">';
+          html += '<form method="post" id="form-add-post" onsubmit="return doPost(this);">';
+            html += '<input name="type" type="hidden" value="post">';
+            html += '<textarea rows="3" name="caption" placeholder="Write something..."></textarea>';
+            html += '<div class="attachments">';
+              html += '<ul>';
+              
+                html += '<li><img id="post-img-preview" style="display: none;" alt="Image Preview"></li>';
+                html += '<li><video id="post-video-preview" controls style="display: none;">Your browser does not support the video tag.</video></li>';
+                
+                html += '<li><i class="fa fa-image"></i><label class="fileContainer"><input type="file" name="image" accept="image/*" onchange="previewPostImage(this);"></label></li>';
+                html += '<li><i class="fa fa-video-camera"></i><label class="fileContainer"><input type="file" name="video" accept="video/*" onchange="previewPostVideo(this);"></label></li>';
+
+                html += '<li><button type="submit" class="mtr-btn"><span>Post</span></button></li>';
+              html += '</ul>';
+            html += '</div>';
+          html += '</form>';
+        html += '</div>';
+      html += '</div>';
+    html += '</div>';
+    document.getElementById("add-post-box").innerHTML = html;
+
+  }
+
+}
+*/
+    
+    </script>
+    <style>
+      #post-img-preview,
+      #post-video-preview {
+        height: 300px;
+        width: 300px;
+        object-fit: cover;
+      }
+    </style>
+      

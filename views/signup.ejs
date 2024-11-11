@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <title>AlertMe 9Ja</title>
+        <link rel="stylesheet" href="/public/css/main.min.css">
+        <link rel="stylesheet" href="/public/css/color.css">
+        <link rel="stylesheet" href="/public/css/responsive.css">
+        <link rel="stylesheet" href="/public/css/style.css">
+        <link rel="stylesheet" href="/public/css/styles/auth.css">
+
+    </head>
+
+    <body>
+        <div class="theme-layout">
+            <div class="container-fluid pdng0">
+                <div class="row merged back">
+                    <div class="offset-md-3 col-md-6">
+                        <div class="login-reg-bg">
+                            <div class="log-reg-area sign">
+                                <h2 class="log-title">Signup</h2>
+
+                                <form onsubmit="return doRegister(this);">
+                                    <div class="form-group">
+                                        <input type="text" required name="name">
+                                        <label class="control-label">Full Name</label>
+                                        <i class="mtrl-select"></i>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <input type="text" required name="username">
+                                        <label class="control-label">User Name</label>
+                                        <i class="mtrl-select"></i>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" required name="email">
+                                        <label class="control-label">Email</label>
+                                        <i class="mtrl-select"></i>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" required name="password">
+                                        <label class="control-label">Password</label>
+                                        <i class="mtrl-select"></i>
+                        
+                                    </div>
+
+
+                                    <div class="form-radio">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="gender" value="Male" checked>
+                                                <i class="check-box"></i> Male
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="gender" value="Female">
+                                                <i class="check-box"></i> Female
+                                            </label>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <a href="/login">Already have an account?</a>
+                                    <div class="submit-btns">
+                                        <button class="mtr-btn signup" name="submit" type="submit">
+                                            <span>Register</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    <script src="../public/js/authPages/auth.js"> </script>
+    </body>
+
+</html>

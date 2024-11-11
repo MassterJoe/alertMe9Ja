@@ -1,0 +1,103 @@
+    <footer>
+        <div class="container">
+            <div class="row">
+                AlertMe 9Ja &copy; <%= new Date().getFullYear() %>
+            </div>     
+        </div>
+    </footer>
+
+</div>
+<script src="/public/js/jquery-3.3.1.min.js"></script>
+<script src="/public/js/bootstrap.min.js"></script>
+<script src="/public/js/main.min.js"></script>
+<script src="/public/js/script.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    window.user = null; // global object for user
+    const socketIO = io(mainURL);
+
+    function getUser() {
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+        const ajax = new XMLHttpRequest();
+        ajax.open("POST", "/getUser", true);
+
+        // Set the Authorization header with the Bearer token
+        ajax.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+
+        ajax.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                if (this.status == 200) {
+                    const res = JSON.parse(this.responseText);
+                    
+                    if (res.status === "success") {
+                        window.user = res.data;
+
+                        // If profile update page, display profile data
+                        if (typeof isUpdateProfile !== "undefined" && isUpdateProfile) {
+                            showProfileData();
+                        }
+                        if (typeof isHomePage !== "undefined" && isHomePage) {
+                            showAddPost();
+                        }
+                    } else {
+                        // Remove token if unauthorized or expired
+                        localStorage.removeItem("accessToken");
+                        alert("Session expired. Please log in again.");
+                    }
+                } else {
+                    console.error("Failed to fetch user data:", this.statusText);
+                    alert("An error occurred while retrieving user information.");
+                }
+
+                // Update the main menu after response
+                showMainMenu();
+            }
+        };
+
+        ajax.send(); // No need to send the accessToken in the body
+    } else {
+        showMainMenu();
+    }
+}
+
+
+
+
+    // Render the main menu based on login status
+    function showMainMenu() {
+        let html = "";
+     
+        if (localStorage.getItem("accessToken")) {
+            html += '<li><a href="/pages">Pages</a></li>';
+            html += '<li><a href="/groups">Groups</a></li>';
+            html += '<li><a href="/updateProfile">Profile</a></li>';
+            html += '<li><a href="/logout" onclick="return doLogout();">Logout</a></li>';
+        } else {
+            html += '<li><a href="/login">Login</a></li>';
+            html += '<li><a href="/signup">Signup</a></li>';
+        }
+        document.getElementById("main-menu").innerHTML = html;
+    }
+
+    // Log the user out and clear accessToken
+    function doLogout() {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login"; // Redirect to login after logout
+        return false;
+    }
+
+    // Initialize user data on page load
+    window.onload = function () {
+        getUser();
+    };
+
+    // Handle global errors
+    window.onerror = function (file, line, error) {
+        alert(`${file} ${line} ${error}`);
+    };
+</script>
+
+    </body>
+</html>
