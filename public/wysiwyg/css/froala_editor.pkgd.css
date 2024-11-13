@@ -2643,7 +2643,7 @@ button[data-cmd="insertAll"] {
 
 /* When the checkbox is checked, add a blue background */
 .checkbox-container input:checked ~ .checkmark {
-  background-color: #2196F3; }
+  background-color: #00A859; }
 
 /* Create the checkmark/indicator (hidden when not checked) */
 .checkmark:after {

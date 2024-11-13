@@ -39,11 +39,12 @@ function showAddPost() {
   var html = "";
 
   if (localStorage.getItem("accessToken")) {
+    const profileImage = window.userProfileImage
     html += `
       <div class="central-meta">
         <div class="new-postbox">
           <figure>
-            <img src="<%= profileImage %>" alt="User Profile Image">
+            <img src="${profileImage}" alt="User Profile Image">
           </figure>
           <div class="newpst-input">
             <form method="post" id="form-add-post" onsubmit="return doPost(this);">
@@ -84,7 +85,34 @@ function showAddPost() {
   }
 }
 
+function previewPostImage(self){
+   var file = self.files;
+   if(file.length > 0){
+    var fileReader = new FileReader();
 
+    fileReader.onload = function(event){
+      document.getElementById("post-img-preview").style.display = "";
+      document.getElementById("post-img-preview").setAttribute("src", event.target.result);
+    };
+
+    fileReader.readAsDataURL(file[0]);
+   }
+} 
+
+
+function previewPostVideo(self){
+   var file = self.files;
+   if(file.length > 0){
+    var fileReader = new FileReader();
+
+    fileReader.onload = function(event){
+      document.getElementById("post-video-preview").style.display = "";
+      document.getElementById("post-video-preview").setAttribute("src", event.target.result);
+    };
+
+    fileReader.readAsDataURL(file[0]);
+   }
+}
 
 /*
 function showAddPost() {

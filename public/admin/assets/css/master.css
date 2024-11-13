@@ -122,7 +122,7 @@ body {
 }
 
 .default-light-menu:hover {
-    background: #2196F3 !important;
+    background: #00A859 !important;
     color: #fff;
 }
 
@@ -198,7 +198,7 @@ body {
 }
 
 .box-primary {
-    border-top-color: #22a1f9;
+    border-top-color: #00A859;
 }
 
 /*------------------------------------------------------------------
@@ -346,9 +346,9 @@ table.dataTable>tbody>tr.child ul.dtr-details {
 
 .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
-    color: #007bff;
+    color: #00A859;
     background-color: #fff;
-    border-bottom: 2px solid #22a1f9;
+    border-bottom: 2px solid #00A859;
 
 }
 

@@ -98,7 +98,7 @@ var myChart3 = new Chart(chart3, {
         labels: ["Engineering", "Customer Support", "Operations", "Marketing", "R and D"],
         datasets: [{
             data: ["62", "80", "30", "25", "17"],
-            backgroundColor: ["#009688", "#795548", "#673AB7", "#2196F3", "#6da252"],
+            backgroundColor: ["#009688", "#795548", "#673AB7", "#00A859", "#6da252"],
         }]
     },
     options: {
@@ -128,7 +128,7 @@ var myChart4 = new Chart(chart4, {
         labels: ["Married", "Single", "Widowed", "Legaly Separated", "Anulled"],
         datasets: [{
             data: ["60", "45", "6", "3", "11"],
-            backgroundColor: ["#F44336", "#2196F3", "#795548", "#6da252", "#f39c12", "#009688", "#673AB7"],
+            backgroundColor: ["#F44336", "#00A859", "#795548", "#6da252", "#f39c12", "#009688", "#673AB7"],
         }]
     },
     options: {

@@ -1,6 +1,6 @@
-.back{
-    background: url("../../img/authpages.jpg");
-    background-size: cover; /* Make image cover entire element */
-    background-position: center; /* Center the image */
-    background-repeat: repeat; /* Prevent repeating */
+.bg-log{
+    background: url("../../img/signupbg.jpg");
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: repeat; 
 }
