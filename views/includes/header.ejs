@@ -9,6 +9,7 @@
 
   </head>
 
+
   <body>
       <div class="theme-layout">
           <div class="topbar stick" style="display: grid; grid-template-columns: 1fr 3fr;">
@@ -30,89 +31,132 @@
               </div>
           </div>
         
-      
     <script>
       var mainURL = "http://localhost:3000";
 
-      
-function showAddPost() {
-  var html = "";
+       function createLikesSection(data) {
+    var isLiked = false;
 
-  if (localStorage.getItem("accessToken")) {
-    const profileImage = window.userProfileImage
-    html += `
-      <div class="central-meta">
-        <div class="new-postbox">
-          <figure>
-            <img src="${profileImage}" alt="User Profile Image">
-          </figure>
-          <div class="newpst-input">
-            <form method="post" id="form-add-post" onsubmit="return doPost(this);">
-              <input name="type" type="hidden" value="post">
-              <textarea rows="3" name="caption" placeholder="Write something..."></textarea>
-              <div class="attachments">
-                <ul>
-                  <li>
-                    <img id="post-img-preview" style="display: none;" alt="Image Preview">  
-                  </li>
-                  <li>
-                    <video id="post-video-preview" controls style="display: none;">  
-                      Your browser does not support the video tag.
-                    </video>
-                  </li>
-                  <li>
-                    <i class="fa fa-image"></i>
-                    <label class="fileContainer">
-                      <input type="file" name="image" accept="image/*" onchange="previewPostImage(this);">
-                    </label>
-                  </li>
-                  <li>
-                    <i class="fa fa-video-camera"></i>
-                    <label class="fileContainer">
-                      <input type="file" name="video" accept="video/*" onchange="previewPostVideo(this);">
-                    </label>
-                  </li>
-                </ul>
-              </div>
-              <button type="submit" class="mtr-btn"><span>Post</span></button>
-            </form>
-          </div>
-        </div>
-      </div>
+    // Check if the current user has liked the post
+    for (var b = 0; b < data.likers.length; b++) {
+        var liker = data.likers[b];
+        if (liker._id === window.user._id) {
+            isLiked = true;
+            break;
+        }
+    }
+
+    // Set the class based on whether the user has liked the post
+    var className = isLiked ? "like" : "none";
+
+    // Construct the HTML with dynamic values
+    var html = `
+        <div class="we-video-info">
+            <ul>
+                <li>
+                    <span class="${className}" onclick="toggleLikePost(this);" data-id="${data._id}">
+                        <i class="ti-thumb-up"></i>
+                        <ins>${data.likers.length}</ins> <!-- Display the number of likes -->
+                    </span>
+                </li>      
+                <li>
+                    <span class="comment" title="comments">
+                        <i class="fa fa-comments-0"></i>
+                        <ins>${data.comments.length}</ins> 
+                    </span>
+                </li>   
+                <li>
+                    <span class="share" onclick="sharePost(this);" data-id="${data._id}">
+                        <i class="ti-share"></i>
+                        <ins>${data.shares.length}</ins> 
+                    </span>
+                </li>  
+            </ul>
+        </div>        
     `;
 
-    document.getElementById("add-post-box").innerHTML = html;
-  }
+    return html; 
 }
+    
+            
+      function showAddPost() {
+        var html = "";
 
-function previewPostImage(self){
-   var file = self.files;
-   if(file.length > 0){
-    var fileReader = new FileReader();
+        if (localStorage.getItem("accessToken")) {
+          const profileImage = window.userProfileImage
+          html += `
+            <div class="central-meta">
+              <div class="new-postbox">
+                <figure>
+                  <img src="${profileImage}" alt="User Profile Image">
+                </figure>
+                <div class="newpst-input">
+                  <form method="post" id="form-add-post" onsubmit="return doPost(this);">
+                    <input name="type" type="hidden" value="post">
+                    <textarea rows="3" name="caption" placeholder="Write something..."></textarea>
+                    <div class="attachments">
+                      <ul>
+                        <li>
+                          <img id="post-img-preview" style="display: none;" alt="Image Preview">  
+                        </li>
+                        <li>
+                          <video id="post-video-preview" controls style="display: none;">  
+                            Your browser does not support the video tag.
+                          </video>
+                        </li>
+                        <li>
+                          <i class="fa fa-image"></i>
+                          <label class="fileContainer">
+                            <input type="file" name="image" accept="image/*" onchange="previewPostImage(this);">
+                          </label>
+                        </li>
+                        <li>
+                          <i class="fa fa-video-camera"></i>
+                          <label class="fileContainer">
+                            <input type="file" name="video" accept="video/*" onchange="previewPostVideo(this);">
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                    <button type="submit" class="mtr-btn"><span>Post</span></button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          `;
 
-    fileReader.onload = function(event){
-      document.getElementById("post-img-preview").style.display = "";
-      document.getElementById("post-img-preview").setAttribute("src", event.target.result);
-    };
+          document.getElementById("add-post-box").innerHTML = html;
+        }
+      }
 
-    fileReader.readAsDataURL(file[0]);
-   }
-} 
+      function previewPostImage(self){
+        var file = self.files;
+        if(file.length > 0){
+          var fileReader = new FileReader();
+
+          fileReader.onload = function(event){
+            document.getElementById("post-img-preview").style.display = "";
+            document.getElementById("post-img-preview").setAttribute("src", event.target.result);
+          };
+
+          fileReader.readAsDataURL(file[0]);
+        }
+      } 
 
 
-function previewPostVideo(self){
-   var file = self.files;
-   if(file.length > 0){
-    var fileReader = new FileReader();
+      function previewPostVideo(self){
+        var file = self.files;
+        if(file.length > 0){
+          var fileReader = new FileReader();
 
-    fileReader.onload = function(event){
-      document.getElementById("post-video-preview").style.display = "";
-      document.getElementById("post-video-preview").setAttribute("src", event.target.result);
-    };
+          fileReader.onload = function(event){
+            document.getElementById("post-video-preview").style.display = "";
+            document.getElementById("post-video-preview").setAttribute("src", event.target.result);
+          };
 
-    fileReader.readAsDataURL(file[0]);
-   }
-}
+          fileReader.readAsDataURL(file[0]);
+        }
+      }
 
 /*
 function showAddPost() {
