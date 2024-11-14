@@ -117,6 +117,8 @@ function showNewsfeed() {
                                         ${data.video ? `<video style="width:100%; height:359px;" controls>
                                                         <source src="data:${data.video.contentType};base64,${data.video.data}" type="${data.video.contentType}">
                                                         </video>` : ""}
+
+                                        ${createLikesSection(data)}
                                     </div>
                                 </div>
                             </div>
