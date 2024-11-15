@@ -78,7 +78,45 @@
     return html; 
 }
     
-            
+function toggleLikePost(self) {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (accessToken) {
+        var _id = self.getAttribute("data-id");
+
+        var ajax = new XMLHttpRequest();
+        ajax.open("POST", "/toggleLikePost", true);
+        ajax.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+        ajax.setRequestHeader("post-id", _id);
+        
+        ajax.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var res = JSON.parse(this.responseText);
+
+                if (res.status === "success") {
+                    self.className = "like";
+                    var likes = parseInt(self.querySelector("ins").innerHTML);
+                    likes++;
+                    self.querySelector("ins").innerHTML = likes;
+                }
+                if (res.status === "unliked") {
+                    self.className = "none";
+                    var likes = parseInt(self.querySelector("ins").innerHTML);
+                    likes--;
+                    self.querySelector("ins").innerHTML = likes;
+                }
+                if (res.status === "error") {
+                    alert(res.message);
+                }
+            }
+        };
+
+        ajax.send();  // No need for formData since we're sending ID in headers
+    }
+}
+
+      
+
       function showAddPost() {
         var html = "";
 

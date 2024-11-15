@@ -331,6 +331,72 @@ router.get("/", async (req, res) => {
 });
 
 
+
+
+router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), async (req, res) => {
+    const { accessToken, caption, type } = req.body;
+    const createdAt = new Date().getTime();
+
+    try {
+        const user = await User.findOne({ accessToken });
+        if (!user) {
+            return res.status(401).json({ status: "error", message: "User not found or logged out. Please log in again." });
+        }
+
+        let image = null;
+        let video = null;
+
+        if (req.files['image']) {
+            const imgFile = req.files['image'][0];
+            image = {
+                data: imgFile.buffer.toString('base64'),
+                contentType: imgFile.mimetype
+            };
+        }
+
+        if (req.files['video']) {
+            const vidFile = req.files['video'][0];
+            video = {
+                data: vidFile.buffer.toString('base64'),
+                contentType: vidFile.mimetype
+            };
+        }
+
+        const newPost = {
+            caption,
+            type,
+            createdAt,
+            image,
+            video,
+            likers: [],
+            comments: [],
+            shares: [],
+            user: {
+                _id: user._id,
+                name: user.name,
+                profileImage: user.profileImage
+            }
+        };
+
+        // Ensure that MongoDB generates a unique _id for the post
+        user.posts.push(newPost);
+
+        // Save the user document with the new post
+        await user.save();
+
+        res.json({
+            status: "success",
+            message: "Post added successfully!",
+            post: newPost
+        });
+    } catch (error) {
+        console.error("Error in /addPost route:", error);
+        res.status(500).json({ status: "error", message: "Internal server error." });
+    }
+});
+
+
+/*
 router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), async (req, res) => {
     const { accessToken, caption, type } = req.body;
     const createdAt = new Date().getTime();
@@ -391,7 +457,7 @@ router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), a
         res.status(500).json({ status: "error", message: "Internal server error." });
     }
 });
-
+*/
 
 /*
 POST
@@ -428,6 +494,59 @@ router.post("/getNewsfeed", async (req, res) => {
     }
 });
 
+const mongoose = require("mongoose");
+
+router.post("/toggleLikePost", async (req, res) => {
+    //const id = req.headers["post-id"];
+    const id = req.get("post-id");
+
+    const accessToken = req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+    console.log(id);
+    try {
+        // Find the user by access token
+        const user = await User.findOne({ accessToken });
+        if (!user) {
+            return res.status(401).json({ status: "error", message: "User not found or logged out. Please log in again." });
+        }
+
+        console.log(user.posts)
+        
+        // Locate the post in the user's own posts array by `id`
+        const post = user.posts.find(p => p._id === id);
+        if (!post) {
+            return res.status(404).json({ status: "error", message: "Post not found." });
+        }
+
+        // Check if the user has already liked the post
+        const hasLiked = post.likers.some(likerId => likerId.toString() === user._id.toString());
+
+        if (hasLiked) {
+            // If the user has liked the post, remove their like
+            post.likers = post.likers.filter(likerId => likerId.toString() !== user._id.toString());
+            await user.save();
+            return res.json({ status: "unliked", message: "Post unliked successfully." });
+        } else {
+            // If the user hasn't liked the post, add their like
+            post.likers.push(user._id);
+
+            // Create a new notification for the like
+            const notification = {
+                type: "photo-liked",
+                content: `${user.name} has liked your post.`,
+                profileImage: user.profileImage, // Assuming `profileImage` is a field on the User model
+                createdAt: new Date()
+            };
+            user.notifications.push(notification);
+
+            await user.save();
+            return res.json({ status: "success", message: "Post liked successfully." });
+        }
+    } catch (error) {
+        console.error("Error in /toggleLikePost route:", error);
+        return res.status(500).json({ status: "error", message: "Internal server error." });
+    }
+});
 
 //nNb
 router.get("/logout", function(req, res){
