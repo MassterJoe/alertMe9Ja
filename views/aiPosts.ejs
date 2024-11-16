@@ -1,0 +1,159 @@
+<%- include('includes/header') %>
+
+
+<section>
+    <br><br>    
+    <div style="text-align: center;">
+        <h3>Welcome,<a href="/updateProfile"><%= user.name.split(" ")[0] %></a> </h3>
+        <br>
+        <p>My name is Angela <br> i am here to provide relavant information about disasters
+        Please feel free to engage with my posts and ask me questions, <br> i am here to help you
+        </p>
+    </div>
+</section>
+<section>
+    <div class="gap gray-bg">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row page-contents">
+                        <div class="col-md-3">
+
+                        </div>
+                       <div class="col-md-6">
+                            <div id="add-post-box">
+
+                            </div>
+                            <div class="loadMore" id="newsfeed">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+
+
+</section>
+
+<script>
+    var isHomePage = true;
+    window.userProfileImage = `<%= profileImage %>`;
+
+
+function doPost(form){
+  var ajax = new XMLHttpRequest();
+  ajax.open("POST", "/addPost", true);
+
+  ajax.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+      var res = JSON.parse(this.responseText);
+      alert(res.message);
+
+      if(res.status == "success"){
+        document.getElementById("form-add-post").querySelector("input[name='image']").value = "";
+        document.getElementById("form-add-post").querySelector("input[name='video']").value = "";
+        document.getElementById("form-add-post").querySelector("textarea[name='caption']").value = "";
+        
+        document.getElementById("post-img-preview").style.display = "none";
+        document.getElementById("post-video-preview").style.display = "none";
+
+        showNewsfeed();
+      }
+    }
+  };
+
+  var formData = new FormData(form);
+  formData.append("accessToken", localStorage.getItem("accessToken"));
+  ajax.send(formData);
+
+  return false;
+}
+
+
+function showNewsfeed() {
+    const profileImage = window.userProfileImage
+    
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+        let ajax = new XMLHttpRequest();
+        
+        // Set request header before opening the request
+        ajax.open("POST", "/getNewsfeed", true);
+        ajax.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+
+        ajax.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                let res = JSON.parse(this.responseText);
+                let html = "";
+                
+                // Define month names for better readability
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+                for (let i = 0; i < res.data.length; i++) {
+                    let data = res.data[i];
+
+                    let user = data.user
+
+                    // Format createdAt date with time
+                    let createdAt = new Date(data.createdAt);
+                    let dayOfWeek = daysOfWeek[createdAt.getDay()];
+
+                    // Format date with the day, time, and month
+                    let date = `${dayOfWeek}, ${createdAt.getDate().toString().padStart(2, "0")} ${months[createdAt.getMonth()]}, ${createdAt.getFullYear()} 
+                                ${createdAt.getHours().toString().padStart(2, "0")}:${createdAt.getMinutes().toString().padStart(2, "0")}:${createdAt.getSeconds().toString().padStart(2, "0")}`;
+
+                    html += `
+                        <div class="central-meta item">
+                            <div class="user-post">
+                                <div class="friend-info">
+                                    <figure>
+                                        <img src="${profileImage}" alt="User Profile" style="width: 45px; height: 45px; object-fit: cover;">
+                                    </figure>
+                                    <div class="friend-name">
+                                        <ins>
+                                            <a href="/user/${user._id}">
+                                                ${user.name}
+                                            </a>
+                                        </ins>
+                                        <span>Published: ${date}</span>
+                                    </div>
+                                    <div class="post-meta">
+                                        <p>${data.caption}</p>
+                                        ${data.image ? `<img src="data:${data.image.contentType};base64,${data.image.data}" alt="Post Image">` : ""}
+                                        ${data.video ? `<video style="width:100%; height:359px;" controls>
+                                                        <source src="data:${data.video.contentType};base64,${data.video.data}" type="${data.video.contentType}">
+                                                        </video>` : ""}
+
+                                        ${createLikesSection(data)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Display the generated HTML in the newsfeed container
+                document.getElementById("newsfeed").innerHTML = html;
+            }
+        };
+
+        // Send the request with the access token
+        let formData = new FormData();
+        ajax.send(formData);
+    } else {
+        console.error("No access token found. Please log in.");
+    }
+}
+
+
+
+//nNb
+</script>
+
+
+
+<%- include('includes/footer') %>

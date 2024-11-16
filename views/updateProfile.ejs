@@ -75,8 +75,13 @@
     </div>
 </section>
 
+
 <script>
-    var isUpdateProfile = true;
+
+   
+
+var isUpdateProfile = true;
+
     window.user = {
       name: `<%= name %>`,
       dob: `<%= dob %>`,
@@ -87,6 +92,8 @@
       aboutMe: `<%= aboutMe %>`
     };
 
+
+     
     function showProfileData() {
     // Safely assign values or default to an empty string
     document.querySelector(".user-name").innerHTML = window.user.name || "";
@@ -127,7 +134,7 @@ function uploadCoverPhoto() {
         console.error("No file selected for upload");
     }
 
-    return false;  // Prevent default form submission
+    return false; 
 }
 
 

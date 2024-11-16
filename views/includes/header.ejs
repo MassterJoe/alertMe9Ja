@@ -19,7 +19,7 @@
                   </a>
               </div>
 
-              <div class="top-area" style="display: flex; justify-content: right; justify-self: flex-end; align-items: center;">
+              <div class="top-area" style="justify-self: flex-end;">
                   <ul class="main-menu" id="main-menu">
 
                   </ul>
@@ -33,9 +33,9 @@
         
     <script>
       var mainURL = "http://localhost:3000";
-
+    
        function createLikesSection(data) {
-    var isLiked = false;
+      var isLiked = false;
 
     // Check if the current user has liked the post
     for (var b = 0; b < data.likers.length; b++) {

@@ -70,14 +70,16 @@
         let html = "";
      
         if (localStorage.getItem("accessToken")) {
-            html += '<li><a href="/pages">Pages</a></li>';
-            html += '<li><a href="/groups">Groups</a></li>';
+            html += '<li><a href="/">Home</a></li>';
+            html += '<li><a href="/posts">Report an Emergency</a></li>';
+            html += '<li><a href="/aiPosts">Meet Angela</a></li>';
             html += '<li><a href="/updateProfile">Profile</a></li>';
             html += '<li><a href="/logout" onclick="return doLogout();">Logout</a></li>';
         } else {
             html += '<li><a href="/login">Login</a></li>';
             html += '<li><a href="/signup">Signup</a></li>';
         }
+
         document.getElementById("main-menu").innerHTML = html;
     }
 

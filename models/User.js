@@ -1,3 +1,29 @@
+const mongoose = require("mongoose");
+
+const UserSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    username: { type: String, unique: true, sparse: true },
+    email: { type: String, unique: true, sparse: true }, // Optional for the AI Bot
+    password: { type: String }, // AI Bot won't use this field
+    gender: { type: String, enum: ["Male", "Female", "Other"], default: "Other" }, // Optional field
+    profileImage: { data: Buffer, contentType: String }, // Store binary data for images
+    coverPhoto: { data: Buffer, contentType: String },
+    dob: { type: String }, // Consider using a `Date` type if needed for real users
+    city: { type: String },
+    country: { type: String },
+    aboutMe: { type: String },
+    friends: { type: Array, default: [] },
+    pages: { type: Array, default: [] },
+    notifications: { type: Array, default: [] },
+    groups: { type: Array, default: [] },
+    posts: { type: Array, default: [] },
+    accessToken: { type: String },
+    isBot: { type: Boolean, default: false }, // Flag to indicate if the user is an AI Bot
+});
+
+module.exports = mongoose.model("User", UserSchema);
+
+/*
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
@@ -6,9 +32,7 @@ const UserSchema = new mongoose.Schema({
     email: String,
     password: String,
     gender: String,
-    profileImage: String,
-    coverPhoto: String,
-     profileImage: { data: Buffer, contentType: String },
+    profileImage: { data: Buffer, contentType: String },
     coverPhoto: { data: Buffer, contentType: String },
      dob: { type: String },
     city: String,
@@ -19,7 +43,9 @@ const UserSchema = new mongoose.Schema({
     notifications: Array,
     groups: Array,
     posts: Array,
-    accessToken: String // Add this field
+    accessToken: String,
+    isBot: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('User', UserSchema);
+*/

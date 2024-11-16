@@ -11,6 +11,11 @@ const moment = require("moment");
 const { render } = require('ejs');
 var mainURL = "http://localhost:3000"
 
+const OpenAI = require("openai");
+//const openai = new OpenAI();
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 /* Sign Up */
 router.get("/signup", (req, res) => {
@@ -67,6 +72,7 @@ router.post("/signup", upload.none(), async (req, res) => {
 /* Login */
 
 router.get("/login", (req, res) => {
+
     res.render('login');
 });
 
@@ -146,7 +152,8 @@ router.get("/updateProfile", async (req, res) => {
                 dob: user.dob,
                 city: user.city,
                 country: user.country,
-                aboutMe: user.aboutMe
+                aboutMe: user.aboutMe,
+                isBot: user.isBot
             
             });
         } else {
@@ -328,7 +335,7 @@ router.post('/uploadProfileImage', upload.single('profileImage'), async (req, re
     }
 });
 
-router.get("/", async (req, res) => {
+router.get("/posts", async (req, res) => {
     const accessToken = req.cookies.accessToken;
 
     try {
@@ -345,10 +352,10 @@ router.get("/", async (req, res) => {
             ? `data:${user.coverPhoto.contentType};base64,${user.coverPhoto.data.toString('base64')}`
             : null;
 
-
-        res.render('index', {
+        res.render('posts', {
             profileImage: profileImage,
-            coverPhoto: coverPhoto
+            coverPhoto: coverPhoto,
+            user
         });
     } catch (error) {
         console.error("Error in / route:", error);
@@ -461,7 +468,7 @@ router.post("/toggleLikePost", async (req, res) => {
     const id = req.headers["post-id"];
     const accessToken = req.headers.authorization && req.headers.authorization.split(" ")[1];
 
-    console.log(id);
+    
     try {
         // Find the user by access token
         const user = await User.findOne({ accessToken });
@@ -469,7 +476,6 @@ router.post("/toggleLikePost", async (req, res) => {
             return res.status(401).json({ status: "error", message: "User not found or logged out. Please log in again." });
         }
 
-        console.log(user.posts)
         
         // Locate the post in the user's own posts array by `id`
         const post = user.posts.find(p => p._id === id);
@@ -507,10 +513,171 @@ router.post("/toggleLikePost", async (req, res) => {
     }
 });
 
+
+
+
 //nNb
 router.get("/logout", function(req, res){
     res.redirect("/login");
 });
 
 
+/* AI routes */
+
+router.get("/aiBotProfile", async (req, res) => {
+    const accessToken = req.cookies.accessToken;  // Assuming you're using cookies to store access token
+
+    if (!accessToken) {
+        // If no access token, redirect to login page
+        return res.redirect("/login");
+    }
+
+    try {
+        // Find the AI Bot user (using `isBot: true` to get the AI Bot's profile)
+        const aiBot = await User.findOne({ isBot: true });
+
+        if (aiBot) {
+        
+                
+            // Render the updateProfile view with AI Bot data
+            res.render("updateAIProfile", {
+                name: aiBot.name,
+                username: aiBot.username,
+                email: aiBot.email,
+                dob: aiBot.dob,
+                city: aiBot.city,
+                country: aiBot.country,
+                aboutMe: aiBot.aboutMe,
+                isBot: true  // Indicating this is a bot profile
+            });
+        } else {
+            // If no AI Bot profile is found
+            res.status(404).json({ status: "error", message: "AI Bot profile not found." });
+        }
+    } catch (error) {
+        console.error("Error in /aiBotProfile route:", error);
+        res.status(500).json({ status: "error", message: "Internal server error." });
+    }
+});
+
+
+router.post("/generate-post", async (req, res) => {
+    try {
+        // Fetch Angela's user record
+        const angela = await User.findOne({ name: "Angela" });
+        if (!angela) {
+            return res.status(404).json({ error: "Angela (AI Bot) not found." });
+        }
+
+        const context = "Educational and informative post on disaster awareness";
+
+        // Generate post using OpenAI
+        const response = await openai.completions.create({
+            model: "gpt-3.5-turbo-instruct",
+            prompt: `${context} + Generate a different educational tweet about disasters, crimes, flooding, or any natural or artificial disaster.`,
+            max_tokens: 1000,
+            temperature: 0.7,
+        });
+
+        const generatedPost = response.choices[0].text.trim();
+
+        // Push the post into Angela's `posts` array
+        angela.posts.push({
+            content: generatedPost,
+            createdAt: new Date(),
+        });
+
+        // Save the updated user record
+        await angela.save();
+
+        res.status(201).json({
+            message: "Post generated and saved successfully to Angela's profile!",
+            post: generatedPost,
+        });
+    } catch (error) {
+        console.error("Error generating or saving the post:", error);
+        res.status(500).json({
+            error: "An error occurred while generating the post.",
+        });
+    }
+}
+);
+
+// Render Angela's profile with her posts
+router.get("/angela-posts", async (req, res) => {
+    try {
+        const angela = await User.findOne({ name: "Angela" });
+
+        if (!angela) {
+            return res.status(404).send("Angela (AI Bot) not found.");
+        }
+
+        res.render("aiPosts", {
+                     posts: angela.posts 
+                    });
+    } catch (error) {
+        console.error("Error rendering Angela's posts:", error);
+        res.status(500).send("An error occurred.");
+    }
+});
+
+
+
+
 module.exports = router;
+
+/*
+
+
+async function addAIBot() {
+
+    try {
+        const botExists = await User.findOne({ name: "Angela" });
+        if (botExists) {
+            console.log("AI Bot already exists in the database.");
+            return;
+        }
+
+         const aiBot = new User({
+            name: "Angela",
+            email: "alertme9ja@gmail.com",
+            dob: "16/11/2024", 
+            city: "Virtual City",
+            country: "nigeria",
+            aboutMe: "I am Angela, your AI assistant dedicated to promoting community safety and disaster awareness.",
+            profileImage: "/img/cover.webp",
+            coverPhoto: "/img/angela.webp",
+            friends: [], 
+            pages: [], 
+            notifications: [], 
+            groups: [],
+            posts: [], 
+            isBot: true,
+            accessToken: null
+        });
+
+        await aiBot.save();
+        console.log("AI Bot has been successfully added to the database.");
+    } catch (error) {
+        console.error("Error adding AI Bot:", error);
+    } 
+}
+
+addAIBot();
+
+now lets use openai api to generate 
+
+const OpenAI = require("openai");
+const openai = new OpenAI();
+
+async function generateEducationalPost(req, res) {
+    const response = await openai.completions.create({
+      model: "gpt-3.5-turbo-instruct",
+      prompt: `${context} + Generate a different education tweet about climates or earthquakes or disasters or flooding or anything natural or artificial disaster`,
+      max_tokens: 1000,
+      temperature: 0.7,
+    });
+
+    const generatedTweet = response.choices[0].text;
+
+*/
