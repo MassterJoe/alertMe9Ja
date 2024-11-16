@@ -77,22 +77,27 @@
 
 <script>
     var isUpdateProfile = true;
+    window.user = {
+      name: `<%= name %>`,
+      dob: `<%= dob %>`,
+      username: `<%= username %>`,
+      email: `<%= email %>`,
+      city: `<%= city %>`,
+      country: `<%= country %>`,
+      aboutMe: `<%= aboutMe %>`
+    };
 
     function showProfileData() {
-    
-        //document.querySelector("#cover-photo").setAttribute("src", mainURL + "/" + window.user.coverPhoto);
+    // Safely assign values or default to an empty string
+    document.querySelector(".user-name").innerHTML = window.user.name || "";
+    document.querySelector(".name").value = window.user.name || "";
+    document.querySelector(".email").value = window.user.email || "";
+    document.querySelector(".dob").value = window.user.dob || "";
+    document.querySelector(".city").value = window.user.city || "";
+    document.querySelector(".country").value = window.user.country || "";
+    document.querySelector(".aboutMe").value = window.user.aboutMe || "";
+}
 
-        //document.querySelector("#profile-image").setAttribute("src", mainURL + "/" + window.user.profileImage);
-
-        document.querySelector(".user-name").innerHTML = window.user.name;
-        document.querySelector(".name").value = window.user.name;
-        document.querySelector(".email").value = window.user.email;
-        document.querySelector(".dob").value = window.user.dob;
-        document.querySelector(".city").value = window.user.city;
-        document.querySelector(".country").value = window.user.country;
-        document.querySelector(".aboutMe").value = window.user.aboutMe;
-
-    }
 
     
 
@@ -159,29 +164,7 @@ function uploadImage() {
 
     return false; // Prevent form submission
 }
-/*
-function doUpdateProfile(form){
-  form.submit.setAttribute("disabled", "disabled");
-  form.submit.innerHTML = "<span>Loading...</span>";
 
-  var ajax = new XMLHttpRequest();
-  ajax.open("POST", "/updateProfile", true);
-  ajax.onreadystatechange = function(){
-    if(this.readyState == 4 && this.status == 200){
-      form.submit.removeAttribute("disabled");
-      form.submit.innerHTML = "<span>Save<span>";
-
-      var res = JSON.parse(this.responseText);
-      alert(res.message);
-    }
-  };
-  var formData = new FormData(form);
-  formData.append("accessToken", localStorage.getItem("accessToken"));
-  ajax.send(formData);
-
-  return false;
-}
-*/
 
 function doUpdateProfile(form) {
     // Reference the submit button by its name or use querySelector
@@ -203,7 +186,7 @@ function doUpdateProfile(form) {
     };
 
     var formData = new FormData(form);
-    console.log(formData)
+    
     formData.append("accessToken", localStorage.getItem("accessToken"));
     ajax.send(formData);
 
@@ -228,7 +211,7 @@ function doUpdateProfile(form) {
                   </h5>
                   <form onsubmit="return doUpdateProfile(this);">
                     <div class="form-group">
-                      <input type="text" required class="name" name="name">
+                      <input type="text" required class="name" name="name" placeholder="Write your Full Name here... ">
                       <label class="control-label">Full Name</label>
                       <i class="mtrl-select"></i>
                     </div>
@@ -240,13 +223,13 @@ function doUpdateProfile(form) {
                     </div>
                     <br><br>
                     <div class="form-group">
-                      <input type="text" class="dob" name="dob" placeholder="DD/MM/YYYY">
+                      <input type="text" class="dob" name="dob" placeholder="DD/MM/YYYY" >
                       <label class="control-label">Date of Birth</label>
                       <i class="mtrl-select"></i>
                     </div>
                     <br><br>
                     <div class="form-group">
-                      <input type="text" class="city" name="city">
+                      <input type="text" class="city" name="city" >
                       <label class="control-label">City</label>
                       <i class="mtrl-select"></i>
                     </div>
@@ -258,7 +241,7 @@ function doUpdateProfile(form) {
                     </div>
                     <br><br>
                     <div class="form-group">
-                      <textarea rows="4" class="aboutMe" name="aboutMe"></textarea>
+                      <textarea rows="4" class="aboutMe" name="aboutMe" placeholder="Tell us about yourself"></textarea>
                       <label class="control-label">About Me</label>
                       <i class="mtrl-select"></i>
                     </div>

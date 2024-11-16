@@ -4,9 +4,10 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const accessTokenSecret = process.env.JWT_SECRET;
-const upload = require('./../middlewares/uploadMiddleware');  // Import multer middleware
+const upload = require('./../middlewares/uploadMiddleware'); 
 const fs = require('fs');
 const path = require('path');
+const moment = require("moment");
 const { render } = require('ejs');
 var mainURL = "http://localhost:3000"
 
@@ -122,10 +123,9 @@ uddateProfile
 */
 router.get("/updateProfile", async (req, res) => {
     const accessToken = req.cookies.accessToken;
-
     try {
         const user = await User.findOne({ accessToken });
-
+        
         if (user) {
             // Check if profileImage and coverPhoto are defined and then convert to base64
             const profileImage = user.profileImage && user.profileImage.data
@@ -135,9 +135,19 @@ router.get("/updateProfile", async (req, res) => {
                 ? `data:${user.coverPhoto.contentType};base64,${user.coverPhoto.data.toString('base64')}`
                 : null;
 
+
+        
             res.render('updateProfile', {
                 profileImage: profileImage,
-                coverPhoto: coverPhoto
+                coverPhoto: coverPhoto,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                dob: user.dob,
+                city: user.city,
+                country: user.country,
+                aboutMe: user.aboutMe
+            
             });
         } else {
             res.redirect("/login");
@@ -153,39 +163,55 @@ POSt
 Update profile
 
 */
+
 router.post("/updateProfile", upload.none(), async (req, res) => {
     const accessToken = req.cookies.accessToken;
     const { name, dob, city, country, aboutMe } = req.body;
+
     try {
         const user = await User.findOne({ accessToken });
 
         if (!user) {
             return res.json({
                 status: "error",
-                message: "User has been logged out. Please login again"
+                message: "User has been logged out. Please login again",
             });
-        } else {
-            // Update fields on the user document
-            user.set({
-                name,
-                dob,
-                city,
-                country,
-                aboutMe
-            });
-
-            // Save the changes
-            await user.save();
         }
+
+        // Validate and ensure dob is in DD/MM/YYYY format
+        let formattedDob = null;
+        if (dob) {
+            const momentDob = moment(dob, "DD/MM/YYYY", true);
+            if (!momentDob.isValid()) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "Invalid date format. Use DD/MM/YYYY.",
+                });
+            }
+            formattedDob = momentDob.format("DD/MM/YYYY"); 
+        }
+
+        // Update fields
+        user.set({
+            name,
+            dob: formattedDob, // Save formatted DOB
+            city,
+            country,
+            aboutMe,
+        });
+
+        await user.save();
 
         res.json({
             status: "success",
             message: "Profile has been updated",
         });
-
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ status: "error", message: "Internal server error." });
+        return res.status(500).json({
+            status: "error",
+            message: "Internal server error.",
+        });
     }
 });
 
@@ -397,69 +423,6 @@ router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), a
 
 
 /*
-router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), async (req, res) => {
-    const { accessToken, caption, type } = req.body;
-    const createdAt = new Date().getTime();
-
-    try {
-        const user = await User.findOne({ accessToken });
-        if (!user) {
-            return res.status(401).json({ status: "error", message: "User not found or logged out. Please log in again." });
-        }
-
-        let image = null;
-        let video = null;
-
-        if (req.files['image']) {
-            const imgFile = req.files['image'][0];
-            image = {
-                data: imgFile.buffer.toString('base64'),
-                contentType: imgFile.mimetype
-            };
-        }
-
-        if (req.files['video']) {
-            const vidFile = req.files['video'][0];
-            video = {
-                data: vidFile.buffer.toString('base64'),  // Encode video to base64
-                contentType: vidFile.mimetype
-            };
-        }
-
-        const newPost = {
-            caption,
-            type,
-            createdAt,
-            image,
-            video,
-            "likers": [],
-            "comments": [],
-            "shares": [],
-            "user": {
-                "_id": user._id,
-                "name": user.name,
-                "profileImage": user.profileImage
-            }
-
-        };
-
-        // Push the new post to the user's posts array
-        user.posts.push(newPost);
-        await user.save();
-
-        res.json({
-            status: "success",
-            message: "Post added successfully!",
-            post: newPost
-        });
-    } catch (error) {
-        console.error("Error in /addPost route:", error);
-        res.status(500).json({ status: "error", message: "Internal server error." });
-    }
-});
-*/
-
-/*
 POST
  getNewsfeed
 */
@@ -494,12 +457,8 @@ router.post("/getNewsfeed", async (req, res) => {
     }
 });
 
-const mongoose = require("mongoose");
-
 router.post("/toggleLikePost", async (req, res) => {
-    //const id = req.headers["post-id"];
-    const id = req.get("post-id");
-
+    const id = req.headers["post-id"];
     const accessToken = req.headers.authorization && req.headers.authorization.split(" ")[1];
 
     console.log(id);

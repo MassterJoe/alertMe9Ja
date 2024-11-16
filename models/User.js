@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
     coverPhoto: String,
      profileImage: { data: Buffer, contentType: String },
     coverPhoto: { data: Buffer, contentType: String },
-    dob: Date,
+     dob: { type: String },
     city: String,
     country: String,
     aboutMe: String,
