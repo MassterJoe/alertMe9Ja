@@ -18,6 +18,7 @@ const UserSchema = new mongoose.Schema({
     groups: { type: Array, default: [] },
     posts: { type: Array, default: [] },
     accessToken: { type: String },
+    location: { type: Array, default: [] },
     isBot: { type: Boolean, default: false }, // Flag to indicate if the user is an AI Bot
 });
 
