@@ -52,7 +52,7 @@ function doLogin(form) {
 
         if (res.status === "success") {
             localStorage.setItem("accessToken", res.accessToken);
-            window.location.href = res.profileImage ? "/" : "/updateProfile";
+            window.location.href = res.profileImage ? "/posts" : "/updateProfile";
         } else {
             alert(res.message);
         }

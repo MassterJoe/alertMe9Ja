@@ -47,7 +47,7 @@
     var isHomePage = true;
     window.userProfileImage = `<%= profileImage %>`;
 
-
+/*
 function doPost(form){
   var ajax = new XMLHttpRequest();
   ajax.open("POST", "/addPost", true);
@@ -76,7 +76,107 @@ function doPost(form){
 
   return false;
 }
+*/
 
+
+function doPost(form) {
+  // Check if geolocation is available
+  if (navigator.geolocation) {
+    // Get user location
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Prepare geolocation data
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // Add geolocation data to the form data
+        var ajax = new XMLHttpRequest();
+        ajax.open("POST", "/addPost", true);
+
+        ajax.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            var res = JSON.parse(this.responseText);
+            alert(res.message);
+
+            if (res.status == "success") {
+              document
+                .getElementById("form-add-post")
+                .querySelector("input[name='image']").value = "";
+              document
+                .getElementById("form-add-post")
+                .querySelector("input[name='video']").value = "";
+              document
+                .getElementById("form-add-post")
+                .querySelector("textarea[name='caption']").value = "";
+
+              document.getElementById("post-img-preview").style.display =
+                "none";
+              document.getElementById("post-video-preview").style.display =
+                "none";
+
+              showNewsfeed();
+            }
+          }
+        };
+
+        var formData = new FormData(form);
+        formData.append("accessToken", localStorage.getItem("accessToken"));
+        formData.append("latitude", latitude);
+        formData.append("longitude", longitude);
+
+        ajax.send(formData);
+      },
+      (error) => {
+        // Handle geolocation error
+        console.error("Geolocation error:", error.message);
+        //alert("Unable to retrieve location. Please check your browser settings.");
+
+        // Submit form without location if user denies or there's an error
+        sendFormWithoutLocation(form);
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by your browser.");
+    sendFormWithoutLocation(form);
+  }
+
+  return false;
+}
+
+// Fallback function to send form without geolocation data
+function sendFormWithoutLocation(form) {
+  var ajax = new XMLHttpRequest();
+  ajax.open("POST", "/addPost", true);
+
+  ajax.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var res = JSON.parse(this.responseText);
+      alert(res.message);
+
+      if (res.status == "success") {
+        document
+          .getElementById("form-add-post")
+          .querySelector("input[name='image']").value = "";
+        document
+          .getElementById("form-add-post")
+          .querySelector("input[name='video']").value = "";
+        document
+          .getElementById("form-add-post")
+          .querySelector("textarea[name='caption']").value = "";
+
+        document.getElementById("post-img-preview").style.display = "none";
+        document.getElementById("post-video-preview").style.display = "none";
+
+        showNewsfeed();
+      }
+    }
+  };
+
+  var formData = new FormData(form);
+  formData.append("accessToken", localStorage.getItem("accessToken"));
+
+  ajax.send(formData);
+}
 
 function showNewsfeed() {
     const profileImage = window.userProfileImage

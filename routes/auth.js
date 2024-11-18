@@ -8,14 +8,11 @@ const upload = require('./../middlewares/uploadMiddleware');
 const fs = require('fs');
 const path = require('path');
 const moment = require("moment");
-const { render } = require('ejs');
-var mainURL = "http://localhost:3000"
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const OpenAI = require("openai");
-//const openai = new OpenAI();
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+var mainURL = "http://localhost:3000"
+ var sendToAI = [];
+
 
 /* Sign Up */
 router.get("/signup", (req, res) => {
@@ -352,7 +349,7 @@ router.get("/posts", async (req, res) => {
             ? `data:${user.coverPhoto.contentType};base64,${user.coverPhoto.data.toString('base64')}`
             : null;
 
-        res.render('posts', {
+        res.render('post', {
             profileImage: profileImage,
             coverPhoto: coverPhoto,
             user
@@ -365,11 +362,10 @@ router.get("/posts", async (req, res) => {
 
 
 
-
 router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), async (req, res) => {
-    const { accessToken, caption, type } = req.body;
+    const { latitude, longitude, accessToken, caption, type } = req.body;
     const createdAt = new Date().getTime();
-
+    console.log("User Location:", { latitude, longitude });
     try {
         const user = await User.findOne({ accessToken });
         if (!user) {
@@ -411,17 +407,18 @@ router.post("/addPost", upload.fields([{ name: 'image' }, { name: 'video' }]), a
             }
         };
 
-        // Ensure that MongoDB generates a unique _id for the post
+       
         user.posts.push(newPost);
-
+        sendToAI = [newPost];       
         // Save the user document with the new post
         await user.save();
-
+        
         res.json({
             status: "success",
             message: "Post added successfully!",
             post: newPost
         });
+
     } catch (error) {
         console.error("Error in /addPost route:", error);
         res.status(500).json({ status: "error", message: "Internal server error." });
@@ -569,30 +566,43 @@ router.post("/generate-post", async (req, res) => {
             return res.status(404).json({ error: "Angela (AI Bot) not found." });
         }
 
-        const context = "Educational and informative post on disaster awareness";
+        let arr = ["crimes", "flooding", "natural and artificial disaster"];
+        let randomItem = arr[Math.floor(Math.random() * arr.length)];
 
-        // Generate post using OpenAI
-        const response = await openai.completions.create({
-            model: "gpt-3.5-turbo-instruct",
-            prompt: `${context} + Generate a different educational tweet about disasters, crimes, flooding, or any natural or artificial disaster.`,
-            max_tokens: 1000,
-            temperature: 0.7,
-        });
+        const context = `In less than 100 words write post to teach the public on ${randomItem}, let it be easy to understand End your writeup with a quote on safety`;
 
-        const generatedPost = response.choices[0].text.trim();
-
-        // Push the post into Angela's `posts` array
+        const gemini_api_key = process.env.API_KEY;
+            const googleAI = new GoogleGenerativeAI(gemini_api_key);
+            const geminiConfig = {
+            temperature: 0.9,
+            topP: 1,
+            topK: 1,
+            maxOutputTokens: 4096,
+            };
+            
+            const geminiModel = googleAI.getGenerativeModel({
+            model: "gemini-pro",
+            geminiConfig,
+            });
+            
+    
+                const prompt = `${context}`;
+                const result = await geminiModel.generateContent(prompt);
+                const response = result.response;
+               const generatedPost = response.text();
+        
+               // Push the post into Angela's `posts` array
         angela.posts.push({
-            content: generatedPost,
-            createdAt: new Date(),
-        });
+          content: generatedPost,
+         createdAt: new Date(),
+       });
 
         // Save the updated user record
         await angela.save();
 
         res.status(201).json({
             message: "Post generated and saved successfully to Angela's profile!",
-            post: generatedPost,
+            //post: generatedPost,
         });
     } catch (error) {
         console.error("Error generating or saving the post:", error);
@@ -603,8 +613,33 @@ router.post("/generate-post", async (req, res) => {
 }
 );
 
+
 // Render Angela's profile with her posts
+router.post("/angela-posts", async (req, res) => {
+    try {
+        const angela = await User.findOne({ name: "Angela" });
+
+        if (!angela) {
+            return res.status(404).send("Angela (AI Bot) not found.");
+        }
+        const posts = angela.posts
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 5);  // Limit to 5 latest posts
+
+        res.json({
+            status: "success",
+            message: "Record has been fetched",
+            data: posts
+        });
+    } catch (error) {
+        console.error("Error rendering Angela's posts:", error);
+        res.status(500).send("An error occurred.");
+    }
+});
+
+
 router.get("/angela-posts", async (req, res) => {
+    
     try {
         const angela = await User.findOne({ name: "Angela" });
 
@@ -612,15 +647,14 @@ router.get("/angela-posts", async (req, res) => {
             return res.status(404).send("Angela (AI Bot) not found.");
         }
 
-        res.render("aiPosts", {
-                     posts: angela.posts 
-                    });
+        res.render('aiPosts', {
+            data: angela
+        });
     } catch (error) {
-        console.error("Error rendering Angela's posts:", error);
-        res.status(500).send("An error occurred.");
+        console.error("Error in / route:", error);
+        res.status(500).json({ status: "error", message: "Internal server error." });
     }
 });
-
 
 
 
